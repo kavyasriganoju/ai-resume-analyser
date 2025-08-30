@@ -1,12 +1,12 @@
 name: Test EC2 SSH
 
 on:
-  workflow_dispatch: # manual trigger only
+  workflow_dispatch: # 👈 enables the Run workflow button in Actions tab
 
 jobs:
   ssh-test:
     runs-on: ubuntu-latest
-    environment: EC2 # optional, if you already defined secrets there
+    environment: EC2
 
     steps:
       - name: Test SSH Connection
