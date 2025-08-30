@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resume Analyzer</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f4f6f8; color: #333; }
+    header { background: #1976d2; color: #fff; padding: 20px; text-align: center; }
+    .container { max-width: 900px; margin: 20px auto; padding: 20px; background: #fff; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+    h2 { margin-top: 0; }
+    .upload-section { border: 2px dashed #ccc; padding: 20px; text-align: center; border-radius: 10px; margin-bottom: 20px; }
+    .upload-section input, .upload-section textarea { margin-top: 10px; display: block; width: 100%; }
+    button { margin-top: 15px; padding: 10px 20px; background: #1976d2; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    button:hover { background: #125ea6; }
+    .progress-bar { background: #eee; border-radius: 20px; overflow: hidden; margin: 10px 0; height: 20px; }
+    .progress { background: #4caf50; height: 100%; width: 0%; text-align: center; color: #fff; font-size: 12px; transition: width 0.5s; }
+    .section { margin-top: 20px; }
+    .card { background: #fafafa; padding: 15px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid #1976d2; }
+    ul { padding-left: 20px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Resume Analyzer</h1>
+    <p>Upload your resume & JD to get ATS score, critique, and suggestions</p>
+  </header>
+
+  <div class="container">
+    <div class="upload-section">
+      <h2>Upload Resume & Job Description</h2>
+      <form id="analyzeForm" enctype="multipart/form-data">
+        <input type="file" name="resume" id="resumeFile" accept=".pdf,.doc,.docx" />
+        <textarea name="job_desc" id="jobDesc" rows="6" placeholder="Paste Job Description here..."></textarea>
+        <button type="submit">Analyze</button>
+      </form>
+    </div>
+
+    <div id="results" style="display:none;">
+      <div class="section">
+        <h2>ATS Score</h2>
+        <div class="progress-bar">
+          <div class="progress" id="scoreProgress">0%</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>Strengths</h2>
+        <ul id="strengthsList"></ul>
+      </div>
+
+      <div class="section">
+        <h2>Weaknesses</h2>
+        <ul id="weaknessesList"></ul>
+      </div>
+
+      <div class="section">
+        <h2>Suggestions</h2>
+        <div id="suggestionsCards"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById("analyzeForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+
+      const response = await fetch("/analyze", {
+        method: "POST",
+        body: formData
+      });
+
+      const data = await response.json();
+
+      // Show results
+      document.getElementById("results").style.display = "block";
+
+      // Progress bar
+      const progressEl = document.getElementById("scoreProgress");
+      progressEl.style.width = data.score + "%";
+      progressEl.textContent = data.score + "%";
+
+      // Strengths
+      const sList = document.getElementById("strengthsList");
+      sList.innerHTML = "";
+      data.strengths.forEach(s => {
+        const li = document.createElement("li");
+        li.textContent = s;
+        sList.appendChild(li);
+      });
+
+      // Weaknesses
+      const wList = document.getElementById("weaknessesList");
+      wList.innerHTML = "";
+      data.weaknesses.forEach(w => {
+        const li = document.createElement("li");
+        li.textContent = w;
+        wList.appendChild(li);
+      });
+
+      // Suggestions
+      const sCards = document.getElementById("suggestionsCards");
+      sCards.innerHTML = "";
+      data.suggestions.forEach(s => {
+        const div = document.createElement("div");
+        div.className = "card";
+        div.textContent = s;
+        sCards.appendChild(div);
+      });
+    });
+  </script>
+</body>
+</html>

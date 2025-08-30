@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Resume ↔ JD Analyzer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+    
+    * { font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif; }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .glass {
+      backdrop-filter: blur(16px) saturate(180%);
+      background: rgba(30, 41, 59, 0.75);
+      border: 1px solid rgba(148, 163, 184, 0.125);
+    }
+    
+    .gradient-text {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .glow {
+      box-shadow: 0 0 20px rgba(102, 126, 234, 0.15);
+    }
+    
+    .animate-fade-in {
+      animation: fadeIn 0.5s ease-in-out;
+    }
+    
+    .animate-slide-up {
+      animation: slideUp 0.4s ease-out;
+    }
+    
+    .animate-pulse-slow {
+      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+  </style>
+</head>
+
+<body class="bg-gradient-to-br from-slate-950 via-slate-900 to-gray-900 min-h-screen text-gray-100 font-sans">
+  <!-- Background Effects -->
+  <div class="fixed inset-0 bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-cyan-500/5"></div>
+  <div class="fixed inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-500/10 via-transparent to-transparent"></div>
+
+  <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+    <!-- Header -->
+    <header class="text-center mb-12 animate-fade-in">
+      <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black mb-4">
+        <span class="gradient-text">Resume</span>
+        <span class="text-gray-300 mx-2">↔</span>
+        <span class="gradient-text">JD</span>
+      </h1>
+      <p class="text-xl text-gray-400 font-light max-w-2xl mx-auto">
+        AI-powered resume analysis with comprehensive insights and scoring
+      </p>
+    </header>
+
+    <!-- Upload Form -->
+    <div class="mb-12 animate-slide-up">
+      <form id="resumeForm" enctype="multipart/form-data" class="glass rounded-3xl p-8 glow">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <!-- Resume Upload -->
+          <div class="space-y-4">
+            <label class="block text-sm font-semibold text-gray-300 mb-3">
+              📄 Resume Document
+            </label>
+            <div class="relative group">
+              <input 
+                id="resume" 
+                name="resume" 
+                type="file" 
+                accept=".pdf,.docx,.txt" 
+                required 
+                class="block w-full text-sm text-gray-400 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-gradient-to-r file:from-blue-600 file:to-purple-600 file:text-white hover:file:from-blue-700 hover:file:to-purple-700 file:transition-all file:duration-200 bg-slate-800/50 border border-slate-700 rounded-xl p-3 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all"
+              />
+              <div class="mt-2 text-xs text-gray-500">
+                Max 16 MB • Supports PDF, DOCX, TXT
+              </div>
+            </div>
+          </div>
+
+          <!-- Job Description -->
+          <div class="space-y-4">
+            <label class="block text-sm font-semibold text-gray-300 mb-3">
+              📋 Job Description
+            </label>
+            <textarea 
+              id="job_desc" 
+              name="job_desc" 
+              placeholder="Paste the job description here..."
+              rows="6"
+              class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-gray-100 placeholder-gray-500 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all resize-none"
+            ></textarea>
+            <div class="text-xs text-gray-500">
+              Or upload a JD file below (pasted text takes precedence)
+            </div>
+          </div>
+        </div>
+
+        <!-- JD File Upload (Optional) -->
+        <div class="mt-8 pt-6 border-t border-slate-700">
+          <label class="block text-sm font-semibold text-gray-300 mb-3">
+            📎 JD File (Optional)
+          </label>
+          <input 
+            id="jd_file" 
+            name="jd_file" 
+            type="file" 
+            accept=".pdf,.docx,.txt"
+            class="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-slate-700 file:text-gray-300 hover:file:bg-slate-600 file:transition-all bg-slate-800/30 border border-slate-700 rounded-xl p-3"
+          />
+        </div>
+
+        <!-- Analyze Button -->
+        <div class="flex justify-center mt-8">
+          <button 
+            id="analyzeBtn" 
+            type="submit" 
+            class="group relative px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-xl font-semibold text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+          >
+            <span class="flex items-center space-x-3">
+              <div id="spinner" class="hidden w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+              <span>🚀 Analyze Resume</span>
+            </span>
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Results Section -->
+    <div id="results" class="space-y-8">
+      <!-- Summary Card -->
+      <div id="summaryCard" class="hidden animate-slide-up glass rounded-3xl p-8">
+        <div class="flex items-center space-x-3 mb-6">
+          <div class="w-10 h-10 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center">
+            <span class="text-xl">📊</span>
+          </div>
+          <h2 class="text-2xl font-bold text-gray-100">Analysis Summary</h2>
+        </div>
+        <div id="summaryContent"></div>
+      </div>
+
+      <!-- Score and Breakdown -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Score Visualization -->
+        <div id="scoreCard" class="hidden animate-slide-up glass rounded-3xl p-8">
+          <div class="flex items-center space-x-3 mb-6">
+            <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center">
+              <span class="text-xl">🎯</span>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-100">Match Score</h2>
+          </div>
+          <div class="relative">
+            <canvas id="scoreChart" height="300"></canvas>
+          </div>
+          <div id="scoreMeta" class="mt-6"></div>
+        </div>
+
+        <!-- Key Insights -->
+        <div id="insightsCard" class="hidden animate-slide-up glass rounded-3xl p-8">
+          <div class="flex items-center space-x-3 mb-6">
+            <div class="w-10 h-10 bg-gradient-to-r from-amber-500 to-orange-500 rounded-xl flex items-center justify-center">
+              <span class="text-xl">💡</span>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-100">Key Insights</h2>
+          </div>
+          <div id="insightsContent"></div>
+        </div>
+      </div>
+
+      <!-- Analysis Cards -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- SpaCy Analysis -->
+        <div id="spacyCard" class="hidden animate-slide-up glass rounded-3xl p-8">
+          <div class="flex items-center space-x-3 mb-6">
+            <div class="w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl flex items-center justify-center">
+              <span class="text-xl">🔍</span>
+            </div>
+            <h2 class="text-xl font-bold text-gray-100">Skills Analysis</h2>
+          </div>
+          <div id="spacyContent"></div>
+        </div>
+
+        <!-- BERT Analysis -->
+        <div id="bertCard" class="hidden animate-slide-up glass rounded-3xl p-8">
+          <div class="flex items-center space-x-3 mb-6">
+            <div class="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
+              <span class="text-xl">🧠</span>
+            </div>
+            <h2 class="text-xl font-bold text-gray-100">Semantic Match</h2>
+          </div>
+          <div id="bertContent"></div>
+        </div>
+      </div>
+
+      <!-- GPT Analysis -->
+      <div id="gptCard" class="hidden animate-slide-up glass rounded-3xl p-8">
+        <div class="flex items-center space-x-3 mb-6">
+          <div class="w-10 h-10 bg-gradient-to-r from-indigo-500 to-blue-500 rounded-xl flex items-center justify-center">
+            <span class="text-xl">🤖</span>
+          </div>
+          <h2 class="text-2xl font-bold text-gray-100">AI Recommendations</h2>
+        </div>
+        <div id="gptContent"></div>
+      </div>
+
+      <!-- Sections Card -->
+      <div id="sectionsCard" class="hidden animate-slide-up glass rounded-3xl p-8">
+        <div class="flex items-center space-x-3 mb-6">
+          <div class="w-10 h-10 bg-gradient-to-r from-cyan-500 to-teal-500 rounded-xl flex items-center justify-center">
+            <span class="text-xl">📋</span>
+          </div>
+          <h2 class="text-2xl font-bold text-gray-100">Detected Sections</h2>
+        </div>
+        <div id="sectionsContent"></div>
+      </div>
+
+      <!-- Raw Data (Collapsible) -->
+      <div id="rawCard" class="hidden animate-slide-up glass rounded-3xl p-8">
+        <details class="group">
+          <summary class="flex items-center space-x-3 cursor-pointer hover:text-blue-400 transition-colors">
+            <div class="w-8 h-8 bg-gradient-to-r from-gray-600 to-gray-700 rounded-lg flex items-center justify-center">
+              <span class="text-sm">🔧</span>
+            </div>
+            <h3 class="text-lg font-semibold">Raw Analysis Data</h3>
+          </summary>
+          <div id="rawContent" class="mt-6"></div>
+        </details>
+      </div>
+
+      <!-- Error Card -->
+      <div id="errorCard" class="hidden animate-slide-up bg-red-500/10 border border-red-500/30 rounded-3xl p-8">
+        <div class="flex items-center space-x-3 mb-4">
+          <div class="w-10 h-10 bg-red-500 rounded-xl flex items-center justify-center">
+            <span class="text-xl">⚠️</span>
+          </div>
+          <h2 class="text-2xl font-bold text-red-400">Error</h2>
+        </div>
+        <div id="errorContent"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const show = (el, visible = true) => {
+      if (visible) {
+        el.classList.remove('hidden');
+        el.classList.add('animate-slide-up');
+      } else {
+        el.classList.add('hidden');
+      }
+    };
+
+    const allowedExt = new Set(['.pdf', '.docx', '.txt']);
+    function extOk(name) { 
+      const m = name.toLowerCase().match(/\.[^.]+$/); 
+      return m && allowedExt.has(m[0]); 
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function createList(items = [], className = '') {
+      if (!items || !items.length) {
+        return '<div class="text-gray-500 text-sm italic">None detected</div>';
+      }
+      return `<ul class="space-y-2 ${className}">
+        ${items.map(item => `
+          <li class="flex items-start space-x-2">
+            <span class="text-blue-400 text-xs mt-1.5">▶</span>
+            <span class="text-gray-300 text-sm">${escapeHtml(String(item))}</span>
+          </li>
+        `).join('')}
+      </ul>`;
+    }
+
+    function createSkillPills(skills = []) {
+      if (!skills || !skills.length) {
+        return '<div class="text-gray-500 text-sm italic">No skills detected</div>';
+      }
+      return `<div class="flex flex-wrap gap-2">
+        ${skills.map(skill => `
+          <span class="px-3 py-1 bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-500/30 rounded-full text-xs font-medium text-blue-300">
+            ${escapeHtml(skill)}
+          </span>
+        `).join('')}
+      </div>`;
+    }
+
+    function createMetricsTable(obj) {
+      if (!obj || Object.keys(obj).length === 0) {
+        return '<div class="text-gray-500 text-sm italic">No metrics available</div>';
+      }
+      return `          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        ${Object.entries(obj).map(([key, value]) => `
+          <div class="bg-slate-800/30 rounded-xl p-4 border border-slate-700">
+            <div class="text-xs text-gray-500 uppercase tracking-wide">${escapeHtml(key)}</div>
+            <div class="text-lg font-bold text-blue-400">${Number(value).toFixed(2)}</div>
+          </div>
+        `).join('')}
+      </div>`;
+    }
+
+    function getGradeColor(grade) {
+      switch (grade.toUpperCase()) {
+        case 'A': return 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30';
+        case 'B': return 'bg-blue-500/20 text-blue-400 border-blue-500/30';
+        case 'C': return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
+        case 'D': return 'bg-orange-500/20 text-orange-400 border-orange-500/30';
+        case 'F': return 'bg-red-500/20 text-red-400 border-red-500/30';
+        default: return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
+      }
+    }
+
+    let radarChart;
+
+    $('resumeForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      // Clear previous results
+      ['errorCard', 'summaryCard', 'scoreCard', 'insightsCard', 'spacyCard', 'bertCard', 'gptCard', 'sectionsCard', 'rawCard'].forEach(id => {
+        show($(id), false);
+      });
+
+      const resume = $('resume').files[0];
+      const jdFile = $('jd_file').files[0];
+      const jdText = $('job_desc').value.trim();
+
+      // Validation
+      if (!resume) return showError('Please select a resume file.');
+      if (!extOk(resume.name)) return showError('Unsupported file type. Please use PDF, DOCX, or TXT.');
+      if (resume.size > 16 * 1024 * 1024) return showError('File too large. Maximum size is 16 MB.');
+      
+      if (!jdText && !jdFile) return showError('Please provide a job description (text or file).');
+
+      const formData = new FormData();
+      formData.append('resume', resume);
+      if (jdText) formData.append('job_desc', jdText);
+      if (jdFile) {
+        if (!extOk(jdFile.name)) return showError('Unsupported JD file type.');
+        formData.append('jd_file', jdFile);
+      }
+
+      // Show loading state
+      const btn = $('analyzeBtn');
+      const spinner = $('spinner');
+      btn.disabled = true;
+      spinner.classList.remove('hidden');
+
+      try {
+        const response = await fetch('/analyze', {
+          method: 'POST',
+          body: formData
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || `Server error: ${response.status}`);
+        }
+
+        renderResults(data);
+
+      } catch (error) {
+        showError(`Analysis failed: ${error.message}`);
+        console.error('Analysis error:', error);
+      } finally {
+        btn.disabled = false;
+        spinner.classList.add('hidden');
+      }
+    });
+
+    function renderResults(data) {
+      renderSummary(data.Summary || {});
+      renderScore(data.ComprehensiveScore || {});
+      renderInsights(data);
+      renderSpacyAnalysis(data.SpacyResumeAnalyzer || {});
+      renderBertAnalysis(data.BertResumeAnalyzer || {});
+      renderGptAnalysis(data.GPTResumeAnalyzer || {});
+      renderSections(data.DetectedSections || null);
+      renderRawData(data);
+    }
+
+    function renderSummary(summary) {
+      $('summaryContent').innerHTML = `
+        <div class="mb-6">
+          <div class="text-lg font-semibold text-gray-200 mb-2">Overall Assessment</div>
+          <p class="text-gray-400 leading-relaxed">${escapeHtml(summary.overall_assessment || 'No assessment available')}</p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div>
+            <div class="text-sm font-semibold text-emerald-400 mb-3">🟢 Key Strengths</div>
+            ${createList(summary.key_strengths)}
+          </div>
+          <div>
+            <div class="text-sm font-semibold text-amber-400 mb-3">🟡 Priority Improvements</div>
+            ${createList(summary.priority_improvements)}
+          </div>
+        </div>
+
+        <div>
+          <div class="text-sm font-semibold text-blue-400 mb-3">⚡ Quick Wins</div>
+          ${createList(summary.quick_wins)}
+        </div>
+      `;
+      show($('summaryCard'));
+    }
+
+    function renderScore(scoreData) {
+      const score = Number(scoreData.final_score || 0).toFixed(1);
+      const grade = (scoreData.grade || 'N/A').toUpperCase();
+      const breakdown = scoreData.breakdown || {};
+
+      $('scoreMeta').innerHTML = `
+        <div class="text-center mb-6">
+          <div class="text-5xl font-black text-blue-400 mb-2">${score}<span class="text-2xl text-gray-500">/100</span></div>
+          <div class="inline-flex items-center px-4 py-2 rounded-full border ${getGradeColor(grade)}">
+            <span class="text-lg font-bold">Grade ${grade}</span>
+          </div>
+        </div>
+        ${createMetricsTable(breakdown)}
+      `;
+      
+      show($('scoreCard'));
+      renderRadarChart(breakdown);
+    }
+
+    function renderInsights(data) {
+      const insights = [];
+      
+      // Collect key insights from different analyzers
+      if (data.SpacyResumeAnalyzer?.skills_match_score) {
+        insights.push(`Skills match score: ${data.SpacyResumeAnalyzer.skills_match_score.toFixed(1)}/100`);
+      }
+      
+      if (data.BertResumeAnalyzer?.ats_score) {
+        insights.push(`ATS compatibility: ${data.BertResumeAnalyzer.ats_score.toFixed(1)}/100`);
+      }
+
+      if (data.GPTResumeAnalyzer?.analysis?.overall_fit_score) {
+        insights.push(`Overall fit: ${data.GPTResumeAnalyzer.analysis.overall_fit_score}/10`);
+      }
+
+      $('insightsContent').innerHTML = `
+        <div class="space-y-4">
+          ${insights.map(insight => `
+            <div class="bg-dark-800/30 rounded-xl p-4 border border-dark-700">
+              <span class="text-gray-300">${escapeHtml(insight)}</span>
+            </div>
+          `).join('')}
+        </div>
+      `;
+      
+      if (insights.length > 0) {
+        show($('insightsCard'));
+      }
+    }
+
+    function renderSpacyAnalysis(spacy) {
+      const skills = spacy.entities?.SKILLS || [];
+      const skillsByCategory = spacy.entities?.SKILLS_BY_CATEGORY || {};
+
+      $('spacyContent').innerHTML = `
+        <div class="space-y-6">
+          <div class="bg-slate-800/20 rounded-xl p-4">
+            <div class="text-sm text-gray-400 mb-1">Skills Match Score</div>
+            <div class="text-2xl font-bold text-green-400">${Number(spacy.skills_match_score || 0).toFixed(1)}/100</div>
+          </div>
+
+          <div>
+            <div class="text-sm font-semibold text-gray-300 mb-3">Detected Skills</div>
+            ${createSkillPills(skills)}
+          </div>
+
+          ${Object.keys(skillsByCategory).length > 0 ? `
+            <div>
+              <div class="text-sm font-semibold text-gray-300 mb-3">Skills by Category</div>
+              <div class="space-y-3">
+                ${Object.entries(skillsByCategory).map(([category, categorySkills]) => `
+                  <div>
+                    <div class="text-xs text-gray-500 mb-2 uppercase tracking-wide">${escapeHtml(category)}</div>
+                    ${createSkillPills(categorySkills)}
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          ` : ''}
+
+          <div>
+            <div class="text-sm font-semibold text-gray-300 mb-3">Recommendations</div>
+            ${createList(spacy.recommendations)}
+          </div>
+        </div>
+      `;
+      show($('spacyCard'));
+    }
+
+    function renderBertAnalysis(bert) {
+      $('bertContent').innerHTML = `
+        <div class="space-y-6">
+          <div class="bg-slate-800/20 rounded-xl p-4">
+            <div class="text-sm text-gray-400 mb-1">ATS Compatibility Score</div>
+            <div class="text-2xl font-bold text-purple-400">${Number(bert.ats_score || 0).toFixed(1)}/100</div>
+          </div>
+
+          <div>
+            <div class="text-sm font-semibold text-gray-300 mb-3">Section Analysis</div>
+            ${createMetricsTable(bert.section_scores)}
+          </div>
+
+          <div>
+            <div class="text-sm font-semibold text-gray-300 mb-3">Optimization Tips</div>
+            ${createList(bert.recommendations)}
+          </div>
+        </div>
+      `;
+      show($('bertCard'));
+    }
+
+    function renderGptAnalysis(gpt) {
+      if (gpt.error) {
+        $('gptContent').innerHTML = `
+          <div class="bg-red-500/10 border border-red-500/30 rounded-xl p-4">
+            <span class="text-red-400">⚠️ GPT Analysis Error: ${escapeHtml(gpt.error)}</span>
+          </div>
+        `;
+      } else {
+        const analysis = gpt.analysis || {};
+        $('gptContent').innerHTML = `
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div>
+              <div class="text-sm font-semibold text-emerald-400 mb-3">💪 Strengths</div>
+              ${createList(analysis.strengths)}
+            </div>
+            <div>
+              <div class="text-sm font-semibold text-amber-400 mb-3">🔧 Areas to Improve</div>
+              ${createList(analysis.weaknesses)}
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div>
+              <div class="text-sm font-semibold text-blue-400 mb-3">💡 Suggestions</div>
+              ${createList(analysis.suggestions)}
+            </div>
+            <div>
+              <div class="text-sm font-semibold text-red-400 mb-3">🎯 Missing Skills</div>
+              ${createList(analysis.missing_skills)}
+            </div>
+          </div>
+
+          <div class="mb-6">
+            <div class="text-sm font-semibold text-cyan-400 mb-3">🤖 ATS Optimization</div>
+            ${createList(analysis.ats_optimization_tips)}
+          </div>
+
+          <div class="bg-slate-800/20 rounded-xl p-4">
+            <div class="text-sm text-gray-400 mb-1">Overall Job Fit</div>
+            <div class="text-2xl font-bold text-indigo-400">${analysis.overall_fit_score || 'N/A'}/10</div>
+          </div>
+        `;
+      }
+      show($('gptCard'));
+    }
+
+    function renderSections(sections) {
+      if (!sections || Object.keys(sections).length === 0) return;
+
+      $('sectionsContent').innerHTML = `
+        <div class="space-y-4">
+          ${Object.entries(sections).map(([name, content]) => `
+            <details class="group bg-slate-800/20 rounded-xl border border-slate-700">
+              <summary class="p-4 cursor-pointer hover:bg-slate-700/30 rounded-xl transition-colors">
+                <span class="font-semibold text-gray-300">${escapeHtml(name)}</span>
+              </summary>
+              <div class="px-4 pb-4">
+                <pre class="text-xs text-gray-400 whitespace-pre-wrap bg-slate-900/50 rounded-lg p-3 overflow-x-auto">${escapeHtml(content)}</pre>
+              </div>
+            </details>
+          `).join('')}
+        </div>
+      `;
+      show($('sectionsCard'));
+    }
+
+    function renderRawData(data) {
+      $('rawContent').innerHTML = `
+        <pre class="text-xs text-gray-400 whitespace-pre-wrap bg-slate-900/50 rounded-xl p-4 overflow-x-auto border border-slate-700">${escapeHtml(JSON.stringify(data, null, 2))}</pre>
+      `;
+      show($('rawCard'));
+    }
+
+    function renderRadarChart(breakdown) {
+      try {
+        const labels = Object.keys(breakdown);
+        const values = Object.values(breakdown).map(v => Number(v) || 0);
+        const ctx = $('scoreChart').getContext('2d');
+
+        if (radarChart) radarChart.destroy();
+
+        radarChart = new Chart(ctx, {
+          type: 'radar',
+          data: {
+            labels: labels,
+            datasets: [{
+              label: 'Score Breakdown',
+              data: values,
+              fill: true,
+              backgroundColor: 'rgba(102, 126, 234, 0.1)',
+              borderColor: 'rgba(102, 126, 234, 0.8)',
+              borderWidth: 2,
+              pointBackgroundColor: 'rgba(102, 126, 234, 1)',
+              pointBorderColor: '#fff',
+              pointBorderWidth: 2,
+              pointRadius: 5,
+              pointHoverRadius: 7
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              r: {
+                beginAtZero: true,
+                max: 100,
+                ticks: {
+                  stepSize: 20,
+                  color: '#6b7280',
+                  backdropColor: 'transparent'
+                },
+                grid: {
+                  color: 'rgba(107, 114, 128, 0.2)'
+                },
+                angleLines: {
+                  color: 'rgba(107, 114, 128, 0.2)'
+                },
+                pointLabels: {
+                  color: '#9ca3af',
+                  font: {
+                    size: 12,
+                    weight: '500'
+                  }
+                }
+              }
+            },
+            plugins: {
+              legend: {
+                display: false
+              }
+            },
+            animation: {
+              duration: 800,
+              easing: 'easeInOutQuart'
+            }
+          }
+        });
+      } catch (error) {
+        console.warn('Chart rendering error:', error);
+      }
+    }
+
+    function showError(message) {
+      $('errorContent').innerHTML = `
+        <div class="space-y-4">
+          <p class="text-red-300 font-medium">${escapeHtml(message)}</p>
+          <div class="text-sm text-red-400/80">
+            <p><strong>Common issues:</strong></p>
+            <ul class="mt-2 space-y-1 list-disc list-inside">
+              <li>Missing or invalid job description</li>
+              <li>Unsupported file format</li>
+              <li>File size exceeds 16 MB limit</li>
+              <li>Server connection issues</li>
+            </ul>
+          </div>
+        </div>
+      `;
+      show($('errorCard'));
+    }
+
+    // File upload visual feedback
+    const fileInputs = ['resume', 'jd_file'];
+    fileInputs.forEach(id => {
+      const input = $(id);
+      input.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+          const parent = input.parentElement;
+          parent.classList.add('ring-2', 'ring-blue-500/50');
+          setTimeout(() => {
+            parent.classList.remove('ring-2', 'ring-blue-500/50');
+          }, 2000);
+        }
+      });
+    });
+
+    // Auto-resize textarea
+    const textarea = $('job_desc');
+    textarea.addEventListener('input', function() {
+      this.style.height = 'auto';
+      this.style.height = Math.min(this.scrollHeight, 300) + 'px';
+    });
+
+    // Add some interactive effects
+    document.querySelectorAll('.glass').forEach(el => {
+      el.addEventListener('mouseenter', () => {
+        el.style.transform = 'translateY(-2px)';
+        el.style.transition = 'transform 0.2s ease-out';
+      });
+      el.addEventListener('mouseleave', () => {
+        el.style.transform = 'translateY(0)';
+      });
+    });
+  </script>
+</body>
+</html>

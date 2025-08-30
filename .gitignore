@@ -1,0 +1,119 @@
+# -------------------------------------------------------------------
+# Python
+# -------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pdb
+*.so
+*.egg-info/
+*.egg
+*.manifest
+*.spec
+
+# Virtual environments
+.env
+.env.*
+venv/
+.venv/
+ENV/
+env/
+Pipfile.lock
+poetry.lock
+
+# Jupyter / notebooks
+.ipynb_checkpoints/
+*.ipynb
+
+# Byte-compiled / cache
+.pytest_cache/
+.coverage
+.cache/
+mypy_cache/
+.dmypy.json
+.pyre/
+.pytype/
+
+# -------------------------------------------------------------------
+# Flask / Logs
+# -------------------------------------------------------------------
+instance/
+*.log
+logs/
+*.sqlite3
+*.db
+
+# -------------------------------------------------------------------
+# AI / ML artifacts
+# -------------------------------------------------------------------
+checkpoints/
+runs/
+wandb/
+mlruns/
+datasets/
+data/
+models/
+*.pt
+*.pth
+*.ckpt
+*.onnx
+*.bin
+*.h5
+*.joblib
+
+# Hugging Face / Transformers cache
+.huggingface/
+transformers_cache/
+torch_cache/
+__huggingface_cache__/
+
+# SpaCy models (if downloaded locally)
+*.tar.gz
+*.whl
+spacy_data/
+
+# -------------------------------------------------------------------
+# Cloud / API keys (NEVER commit)
+# -------------------------------------------------------------------
+apikeys.json
+credentials.json
+secrets.json
+*.pem
+*.key
+*.crt
+
+# -------------------------------------------------------------------
+# Docker / Podman
+# -------------------------------------------------------------------
+
+docker-compose.override.yml
+*.pid
+*.sock
+mnt/
+tmp/
+podman*
+container-data/
+build/
+dist/
+
+# -------------------------------------------------------------------
+# Editors & OS
+# -------------------------------------------------------------------
+.vscode/
+.idea/
+*.swp
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# -------------------------------------------------------------------
+# Tests / Coverage
+# -------------------------------------------------------------------
+htmlcov/
+nosetests.xml
+coverage.xml
+test-results/
+*.cover
+*.py,cover

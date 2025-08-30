@@ -1,0 +1,75 @@
+skills_by_category:
+  cloud_platforms:
+  - aws
+  - azure
+  - gcp
+  - google cloud
+  - docker
+  - kubernetes
+  - terraform
+  - ansible
+  data_science:
+  - machine learning
+  - deep learning
+  - nlp
+  - pandas
+  - numpy
+  - pytorch
+  - tensorflow
+  - scikit-learn
+  - spark
+  databases:
+  - sql
+  - mysql
+  - postgresql
+  - mongodb
+  - redis
+  - elasticsearch
+  - sqlite
+  - oracle
+  - sql server
+  frameworks:
+  - spring boot
+  - laravel
+  - rails
+  - fastapi
+  - nextjs
+  - gatsby
+  - nuxt
+  programming_languages:
+  - python
+  - java
+  - c++
+  - c#
+  - javascript
+  - typescript
+  - go
+  - rust
+  - kotlin
+  - swift
+  - php
+  - ruby
+  - scala
+  - r
+  tools:
+  - git
+  - jenkins
+  - jira
+  - confluence
+  - linux
+  - unix
+  - bash
+  - powershell
+  web_technologies:
+  - react
+  - angular
+  - vue.js
+  - node.js
+  - express.js
+  - django
+  - flask
+  - spring
+  - html
+  - css
+  - sass
+  - less

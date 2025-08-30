@@ -1,0 +1,23 @@
+# Web framework & server
+Flask==2.3.3
+gunicorn==21.2.0
+
+# NLP
+spacy==3.7.2
+# en_core_web_sm model will be installed at build time in Dockerfile
+
+# Document parsing
+PyMuPDF==1.23.8
+python-docx==0.8.11
+
+# Data processing
+numpy==1.24.4
+pandas==2.0.3
+scikit-learn==1.3.2
+
+# OpenAI API (for embeddings, GPT scoring)
+openai==1.3.8
+tiktoken==0.5.2
+
+# Config & utilities
+PyYAML==6.0.1

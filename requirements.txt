@@ -1,0 +1,167 @@
+# Core Flask Framework
+Flask==2.3.3
+Werkzeug==2.3.7
+
+# Production WSGI Server
+gunicorn==21.2.0
+
+# NLP and ML Libraries
+spacy==3.7.2
+en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1-py3-none-any.whl
+
+# PyTorch (CPU version for production efficiency)
+torch==2.1.1 --index-url https://download.pytorch.org/whl/cpu
+torchvision==0.16.1 --index-url https://download.pytorch.org/whl/cpu
+torchaudio==2.1.1 --index-url https://download.pytorch.org/whl/cpu
+
+# Sentence Transformers for BERT embeddings
+sentence-transformers==2.7.0
+transformers==4.35.2
+
+# OpenAI for GPT integration
+openai==1.3.8
+tiktoken==0.5.2
+
+# Document Processing
+PyMuPDF==1.23.8
+python-docx==0.8.11
+
+# Data Processing
+numpy==1.24.4
+pandas==2.0.3
+scikit-learn==1.3.2
+
+# Configuration and Utilities
+PyYAML==6.0.1
+python-dotenv==1.0.0
+
+# HTTP and Requests
+requests==2.31.0
+urllib3==2.0.7
+
+# System Monitoring (optional but recommended for production)
+psutil==5.9.6
+
+# Logging and Error Handling
+structlog==23.2.0
+
+# Security
+cryptography==45.0.6
+
+# Performance and Caching
+joblib==1.3.2
+diskcache==5.6.3
+
+# Development and Testing (optional - remove for production)
+pytest==7.4.3
+pytest-flask==1.3.0
+pytest-cov==4.1.0
+black==23.11.0
+flake8==6.1.0
+mypy==1.7.1
+
+# Additional Utilities
+click==8.1.7
+Jinja2==3.1.2
+MarkupSafe==2.1.3
+itsdangerous==2.1.2
+
+# Regex and Text Processing
+regex==2023.10.3
+
+# JSON and Data Serialization
+jsonschema==4.19.2
+
+# File Upload Handling
+python-magic==0.4.27
+
+# Rate Limiting (for production API)
+Flask-Limiter==3.5.0
+
+# CORS Support (if needed for web frontend)
+Flask-CORS==4.0.0
+
+# Environment Variables
+python-decouple==3.8
+
+# Hugging Face Hub (for model downloads)
+huggingface-hub==0.19.4
+safetensors==0.4.0
+
+# Tokenization
+tokenizers==0.15.0
+
+# Additional NLP utilities
+nltk==3.8.1
+
+# Progress bars for batch processing
+tqdm==4.66.1
+
+# Memory optimization
+gc-python-utils==0.0.1
+
+# Date and time utilities
+python-dateutil==2.8.2
+pytz==2023.3
+
+# Character encoding detection
+chardet==5.2.0
+
+# HTTP status codes
+httpx==0.25.2
+
+# Threading and async support
+#concurrent-futures==3.1.1
+
+# Image processing (if needed for resume images)
+Pillow==10.1.0
+
+# XML processing
+lxml==4.9.3
+
+# Timezone handling
+tzdata==2023.3
+
+# SSL/TLS support
+certifi==2023.11.17
+
+# Unicode handling
+unicodedata2==15.1.0
+
+# Memory profiling (development only)
+memory-profiler==0.61.0
+
+# API documentation (optional)
+flask-restx==1.3.0
+
+# Health check endpoints
+flask-healthz==0.0.3
+
+# Metrics and monitoring
+prometheus-flask-exporter==0.23.0
+
+# File type detection
+filetype==1.2.0
+
+# Text similarity metrics
+textdistance==4.6.0
+
+# Statistical analysis
+scipy==1.11.4
+
+# Configuration validation
+pydantic==2.5.0
+
+# Async support for Flask
+flask-socketio==5.3.6
+
+# Database support (if adding persistence later)
+SQLAlchemy==2.0.23
+Flask-SQLAlchemy==3.0.5
+
+# Migration support (if using database)
+Flask-Migrate==4.0.5
+
+# Caching backend
+redis==5.0.1
+Flask-Caching==2.1.0

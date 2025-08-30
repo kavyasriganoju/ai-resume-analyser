@@ -1,0 +1,45 @@
+# virtualenvs
+venv/
+.venv/
+ENV/
+env/
+files_backup/
+
+# python caches & build
+__pycache__/
+*.py[cod]
+*.egg-info/
+.build/
+dist/
+build/
+.pytest_cache/
+
+# notebooks / data / models / logs
+*.ipynb
+data/
+datasets/
+models/
+checkpoints/
+logs/
+*.log
+
+# vcs & editor
+.git/
+.gitignore
+.gitattributes
+.gitmodules
+.idea/
+.vscode/
+
+# env / secrets
+.env
+.env.*
+*.pem
+*.key
+
+# node junk (if any)
+node_modules/
+
+# OS
+.DS_Store
+Thumbs.db
