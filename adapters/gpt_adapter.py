@@ -9,7 +9,7 @@ Description:
     Provides scoring, strengths/weaknesses, and ATS optimization tips.
 
 """
-import openai
+from openai import OpenAI
 from adapters.base import ResumeAnalyzer
 import json
 import tiktoken
@@ -20,7 +20,16 @@ logger = logging.getLogger(__name__)
 
 class GPTResumeAnalyzer(ResumeAnalyzer):
     def __init__(self, api_key: str):
-        self.client = openai.OpenAI(api_key=api_key)
+        
+        logger.info(f"About to create OpenAI client with api_key: {api_key[:8]}...")
+    
+        try:
+            self.client = OpenAI(api_key=api_key)
+            logger.info("OpenAI client created successfully")
+        except Exception as e:
+            logger.error(f"OpenAI client creation failed: {e}")
+            raise
+
         try:
             self.encoding = tiktoken.get_encoding("cl100k_base")
             logger.info("Tokenizer initialized successfully with cl100k_base")

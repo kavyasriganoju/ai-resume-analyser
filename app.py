@@ -30,7 +30,10 @@ app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 
 # Initialize components
-api_key = os.getenv("OPENAI_API_KEY", "")  # Load from environment
+api_key = os.getenv("OPENAI_API_KEY")
+if not api_key:
+    raise RuntimeError("OPENAI_API_KEY not set. Please configure it in your environment.")
+
 analyzers = AnalyzerFactory.get_analyzers(api_key)
 scorer = ResumeScorer()
 

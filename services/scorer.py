@@ -261,7 +261,7 @@ class ResumeScorer:
 # Legacy function for backward compatibility
 def compute_keyword_score(resume_skills: List[str], jd_text: str) -> float:
     """Legacy function for backward compatibility."""
-    scorer = EnhancedResumeScorer()
+    scorer = ResumeScorer()
     return scorer._compute_keyword_score(resume_skills, jd_text)
 
 def blend_scores(keyword_score: float, semantic_score: float, 
