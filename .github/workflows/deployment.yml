@@ -1,0 +1,35 @@
+name: Build & Deploy to EC2
+
+on:
+  push:
+    branches: ["demo-ec2"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment: EC2 # 👈 pick GitHub Environment here
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Log in to DockerHub
+        run: echo "${{ secrets.DOCKER_PASS }}" | docker login -u "${{ secrets.DOCKER_USER }}" --password-stdin
+
+      - name: Build Docker image
+        run: docker build -t ${{ secrets.DOCKER_USER }}/resume-analyser:latest .
+
+      - name: Push Docker image
+        run: docker push ${{ secrets.DOCKER_USER }}/resume-analyser:latest
+
+      - name: Deploy to EC2 via SSH
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_KEY }}
+          script: |
+            cd /home/ubuntu/app || mkdir -p /home/ubuntu/app && cd /home/ubuntu/app
+            echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" > .env
+            docker-compose pull
+            docker-compose up -d
