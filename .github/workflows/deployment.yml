@@ -32,4 +32,4 @@ jobs:
             cd /home/ubuntu/app || mkdir -p /home/ubuntu/app && cd /home/ubuntu/app
             echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" > .env
             podman-compose pull
-            docker-compose up -d --remove-orphans
+            podman-compose up -d --remove-orphans
