@@ -15,7 +15,10 @@ __pycache__/
 files_backup/
 # Virtual environments
 .env
-.env.*
+.env.local
+.env.development
+.env.production
+.env.test
 venv/
 .venv/
 ENV/
