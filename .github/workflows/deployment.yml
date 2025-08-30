@@ -31,5 +31,5 @@ jobs:
           script: |
             cd /home/ubuntu/app || mkdir -p /home/ubuntu/app && cd /home/ubuntu/app
             echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" > .env
-            docker-compose pull
-            docker-compose up -d
+            podman-compose pull
+            podman-compose up -d
