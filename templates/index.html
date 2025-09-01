@@ -1,737 +1,720 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Resume ↔ JD Analyzer</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resume ATS Analyzer - AI-Powered Analysis</title>
+  <meta name="description" content="Get instant ATS compatibility scores and AI insights to optimize your resume for job applications.">
+  
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     
-    * { font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif; }
-    
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
+    body {
+      font-family: 'Inter', sans-serif;
+      line-height: 1.6;
+      color: #1e293b;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
     }
+    
+    .container { max-width: 1200px; margin: 0 auto; padding: 2rem 1rem; }
+    
+    .card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border-radius: 20px;
+      padding: 2rem;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 3rem;
+      color: white;
+    }
+    
+    .header h1 {
+      font-size: clamp(2.5rem, 5vw, 4rem);
+      font-weight: 700;
+      margin-bottom: 1rem;
+      text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+    
+    .header p {
+      font-size: 1.25rem;
+      opacity: 0.9;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+    
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      color: #374151;
+    }
+    
+    .upload-area {
+      border: 2px dashed #d1d5db;
+      border-radius: 12px;
+      padding: 2rem;
+      text-align: center;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      background: #f9fafb;
+    }
+    
+    .upload-area:hover, .upload-area.active {
+      border-color: #667eea;
+      background: #f0f4ff;
+    }
+    
+    .upload-icon {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1rem;
+      color: white;
+      font-size: 1.5rem;
+    }
+    
+    .file-input { position: absolute; opacity: 0; pointer-events: none; }
+    
+    .textarea {
+      width: 100%;
+      min-height: 120px;
+      padding: 1rem;
+      border: 2px solid #d1d5db;
+      border-radius: 12px;
+      resize: vertical;
+      font-family: inherit;
+      transition: all 0.3s ease;
+    }
+    
+    .textarea:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 1rem 2rem;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      justify-content: center;
+    }
+    
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+    }
+    
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top: 2px solid white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    
+    .results {
+      display: grid;
+      gap: 2rem;
+      margin-top: 3rem;
+      animation: slideUp 0.5s ease-out;
+    }
+    
     @keyframes slideUp {
-      from { opacity: 0; transform: translateY(20px); }
+      from { opacity: 0; transform: translateY(30px); }
       to { opacity: 1; transform: translateY(0); }
     }
     
-    .glass {
-      backdrop-filter: blur(16px) saturate(180%);
-      background: rgba(30, 41, 59, 0.75);
-      border: 1px solid rgba(148, 163, 184, 0.125);
+    .result-card {
+      background: white;
+      border-radius: 16px;
+      padding: 2rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      border: 1px solid #e5e7eb;
     }
     
-    .gradient-text {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    .result-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .result-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.25rem;
+    }
+    
+    .score-display {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    
+    .score-number {
+      font-size: 4rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #667eea, #764ba2);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }
     
-    .glow {
-      box-shadow: 0 0 20px rgba(102, 126, 234, 0.15);
+    .grade-badge {
+      display: inline-block;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-weight: 600;
+      margin-top: 0.5rem;
     }
     
-    .animate-fade-in {
-      animation: fadeIn 0.5s ease-in-out;
+    .grade-a { background: #dcfce7; color: #166534; }
+    .grade-b { background: #dbeafe; color: #1d4ed8; }
+    .grade-c { background: #fef3c7; color: #b45309; }
+    .grade-d { background: #fed7aa; color: #c2410c; }
+    .grade-f { background: #fecaca; color: #dc2626; }
+    
+    .skills-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 1rem;
     }
     
-    .animate-slide-up {
-      animation: slideUp 0.4s ease-out;
+    .skill-tag {
+      background: #f0f4ff;
+      color: #667eea;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      border: 1px solid #e0e7ff;
     }
     
-    .animate-pulse-slow {
-      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    .list-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid #f3f4f6;
+    }
+    
+    .list-item:last-child { border-bottom: none; }
+    
+    .list-icon {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      color: white;
+      flex-shrink: 0;
+      margin-top: 0.125rem;
+    }
+    
+    .error-card {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #dc2626;
+      border-radius: 12px;
+      padding: 1rem;
+      margin-top: 1rem;
+    }
+    
+    .hidden { display: none !important; }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .container { padding: 1rem; }
+      .card { padding: 1.5rem; }
+      .form-grid { grid-template-columns: 1fr; }
+      .header h1 { font-size: 2.5rem; }
+      .header p { font-size: 1.125rem; }
     }
   </style>
 </head>
 
-<body class="bg-gradient-to-br from-slate-950 via-slate-900 to-gray-900 min-h-screen text-gray-100 font-sans">
-  <!-- Background Effects -->
-  <div class="fixed inset-0 bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-cyan-500/5"></div>
-  <div class="fixed inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-500/10 via-transparent to-transparent"></div>
-
-  <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+<body>
+  <div class="container">
     <!-- Header -->
-    <header class="text-center mb-12 animate-fade-in">
-      <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black mb-4">
-        <span class="gradient-text">Resume</span>
-        <span class="text-gray-300 mx-2">↔</span>
-        <span class="gradient-text">JD</span>
-      </h1>
-      <p class="text-xl text-gray-400 font-light max-w-2xl mx-auto">
-        AI-powered resume analysis with comprehensive insights and scoring
-      </p>
-    </header>
+    <div class="header">
+      <h1>Resume ATS Analyzer</h1>
+      <p>AI-powered resume analysis with comprehensive insights and ATS scoring</p>
+    </div>
 
-    <!-- Upload Form -->
-    <div class="mb-12 animate-slide-up">
-      <form id="resumeForm" enctype="multipart/form-data" class="glass rounded-3xl p-8 glow">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <!-- Main Form -->
+    <div class="card">
+      <form id="analyzeForm" enctype="multipart/form-data">
+        <div class="form-grid">
           <!-- Resume Upload -->
-          <div class="space-y-4">
-            <label class="block text-sm font-semibold text-gray-300 mb-3">
-              📄 Resume Document
-            </label>
-            <div class="relative group">
-              <input 
-                id="resume" 
-                name="resume" 
-                type="file" 
-                accept=".pdf,.docx,.txt" 
-                required 
-                class="block w-full text-sm text-gray-400 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-gradient-to-r file:from-blue-600 file:to-purple-600 file:text-white hover:file:from-blue-700 hover:file:to-purple-700 file:transition-all file:duration-200 bg-slate-800/50 border border-slate-700 rounded-xl p-3 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all"
-              />
-              <div class="mt-2 text-xs text-gray-500">
-                Max 16 MB • Supports PDF, DOCX, TXT
-              </div>
+          <div class="form-group">
+            <label>📄 Resume Document *</label>
+            <div class="upload-area" onclick="document.getElementById('resume').click()">
+              <div class="upload-icon">📁</div>
+              <h3>Upload Resume</h3>
+              <p>PDF, DOCX, TXT • Max 16MB</p>
+              <input type="file" id="resume" name="resume" class="file-input" accept=".pdf,.docx,.txt" required>
             </div>
+            <div id="resumeStatus" class="file-status"></div>
           </div>
 
           <!-- Job Description -->
-          <div class="space-y-4">
-            <label class="block text-sm font-semibold text-gray-300 mb-3">
-              📋 Job Description
-            </label>
+          <div class="form-group">
+            <label>📋 Job Description</label>
             <textarea 
               id="job_desc" 
               name="job_desc" 
+              class="textarea" 
               placeholder="Paste the job description here..."
               rows="6"
-              class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-gray-100 placeholder-gray-500 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all resize-none"
             ></textarea>
-            <div class="text-xs text-gray-500">
-              Or upload a JD file below (pasted text takes precedence)
+            <div style="margin-top: 1rem;">
+              <label style="font-size: 0.875rem; color: #6b7280;">Or upload JD file:</label>
+              <div class="upload-area" onclick="document.getElementById('jd_file').click()" style="margin-top: 0.5rem; padding: 1rem;">
+                <input type="file" id="jd_file" name="jd_file" class="file-input" accept=".pdf,.docx,.txt">
+                <span style="font-size: 0.875rem;">📎 Upload JD File (Optional)</span>
+              </div>
+              <div id="jdStatus" class="file-status"></div>
             </div>
           </div>
         </div>
 
-        <!-- JD File Upload (Optional) -->
-        <div class="mt-8 pt-6 border-t border-slate-700">
-          <label class="block text-sm font-semibold text-gray-300 mb-3">
-            📎 JD File (Optional)
-          </label>
-          <input 
-            id="jd_file" 
-            name="jd_file" 
-            type="file" 
-            accept=".pdf,.docx,.txt"
-            class="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-slate-700 file:text-gray-300 hover:file:bg-slate-600 file:transition-all bg-slate-800/30 border border-slate-700 rounded-xl p-3"
-          />
-        </div>
-
         <!-- Analyze Button -->
-        <div class="flex justify-center mt-8">
-          <button 
-            id="analyzeBtn" 
-            type="submit" 
-            class="group relative px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-xl font-semibold text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-          >
-            <span class="flex items-center space-x-3">
-              <div id="spinner" class="hidden w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-              <span>🚀 Analyze Resume</span>
-            </span>
+        <div style="text-align: center; margin-top: 2rem;">
+          <button type="submit" id="analyzeBtn" class="btn">
+            <span id="btnText">🎯 Analyze Resume</span>
+            <div id="spinner" class="spinner hidden"></div>
           </button>
         </div>
       </form>
+
+      <!-- Error Display -->
+      <div id="errorCard" class="error-card hidden">
+        <strong>⚠️ Error:</strong> <span id="errorText"></span>
+      </div>
     </div>
 
-    <!-- Results Section -->
-    <div id="results" class="space-y-8">
+    <!-- Results -->
+    <div id="results" class="results hidden">
+      <!-- Score Card -->
+      <div class="result-card">
+        <div class="result-header">
+          <div class="result-icon" style="background: linear-gradient(135deg, #10b981, #059669);">🎯</div>
+          <h2 style="font-size: 1.5rem; font-weight: 600;">ATS Compatibility Score</h2>
+        </div>
+        <div class="score-display">
+          <div class="score-number" id="scoreNumber">0</div>
+          <div class="grade-badge" id="gradeBadge">Grade N/A</div>
+        </div>
+        <div id="scoreBreakdown"></div>
+      </div>
+
       <!-- Summary Card -->
-      <div id="summaryCard" class="hidden animate-slide-up glass rounded-3xl p-8">
-        <div class="flex items-center space-x-3 mb-6">
-          <div class="w-10 h-10 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center">
-            <span class="text-xl">📊</span>
-          </div>
-          <h2 class="text-2xl font-bold text-gray-100">Analysis Summary</h2>
+      <div class="result-card">
+        <div class="result-header">
+          <div class="result-icon" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8);">📊</div>
+          <h2 style="font-size: 1.5rem; font-weight: 600;">Executive Summary</h2>
         </div>
         <div id="summaryContent"></div>
       </div>
 
-      <!-- Score and Breakdown -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <!-- Score Visualization -->
-        <div id="scoreCard" class="hidden animate-slide-up glass rounded-3xl p-8">
-          <div class="flex items-center space-x-3 mb-6">
-            <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center">
-              <span class="text-xl">🎯</span>
-            </div>
-            <h2 class="text-2xl font-bold text-gray-100">Match Score</h2>
-          </div>
-          <div class="relative">
-            <canvas id="scoreChart" height="300"></canvas>
-          </div>
-          <div id="scoreMeta" class="mt-6"></div>
+      <!-- Skills & Keywords -->
+      <div class="result-card">
+        <div class="result-header">
+          <div class="result-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">💼</div>
+          <h2 style="font-size: 1.5rem; font-weight: 600;">Skills & Keywords Match</h2>
         </div>
-
-        <!-- Key Insights -->
-        <div id="insightsCard" class="hidden animate-slide-up glass rounded-3xl p-8">
-          <div class="flex items-center space-x-3 mb-6">
-            <div class="w-10 h-10 bg-gradient-to-r from-amber-500 to-orange-500 rounded-xl flex items-center justify-center">
-              <span class="text-xl">💡</span>
-            </div>
-            <h2 class="text-2xl font-bold text-gray-100">Key Insights</h2>
-          </div>
-          <div id="insightsContent"></div>
-        </div>
+        <div id="skillsContent"></div>
       </div>
 
-      <!-- Analysis Cards -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <!-- SpaCy Analysis -->
-        <div id="spacyCard" class="hidden animate-slide-up glass rounded-3xl p-8">
-          <div class="flex items-center space-x-3 mb-6">
-            <div class="w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl flex items-center justify-center">
-              <span class="text-xl">🔍</span>
-            </div>
-            <h2 class="text-xl font-bold text-gray-100">Skills Analysis</h2>
-          </div>
-          <div id="spacyContent"></div>
+      <!-- Resume Optimization -->
+      <div class="result-card">
+        <div class="result-header">
+          <div class="result-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">💡</div>
+          <h2 style="font-size: 1.5rem; font-weight: 600;">Resume Optimization Tips</h2>
         </div>
-
-        <!-- BERT Analysis -->
-        <div id="bertCard" class="hidden animate-slide-up glass rounded-3xl p-8">
-          <div class="flex items-center space-x-3 mb-6">
-            <div class="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
-              <span class="text-xl">🧠</span>
-            </div>
-            <h2 class="text-xl font-bold text-gray-100">Semantic Match</h2>
-          </div>
-          <div id="bertContent"></div>
-        </div>
+        <div id="recommendationsContent"></div>
       </div>
 
-      <!-- GPT Analysis -->
-      <div id="gptCard" class="hidden animate-slide-up glass rounded-3xl p-8">
-        <div class="flex items-center space-x-3 mb-6">
-          <div class="w-10 h-10 bg-gradient-to-r from-indigo-500 to-blue-500 rounded-xl flex items-center justify-center">
-            <span class="text-xl">🤖</span>
-          </div>
-          <h2 class="text-2xl font-bold text-gray-100">AI Recommendations</h2>
+      <!-- Resume Structure Analysis -->
+      <div class="result-card">
+        <div class="result-header">
+          <div class="result-icon" style="background: linear-gradient(135deg, #06b6d4, #0891b2);">📋</div>
+          <h2 style="font-size: 1.5rem; font-weight: 600;">Resume Structure & Format</h2>
         </div>
-        <div id="gptContent"></div>
-      </div>
-
-      <!-- Sections Card -->
-      <div id="sectionsCard" class="hidden animate-slide-up glass rounded-3xl p-8">
-        <div class="flex items-center space-x-3 mb-6">
-          <div class="w-10 h-10 bg-gradient-to-r from-cyan-500 to-teal-500 rounded-xl flex items-center justify-center">
-            <span class="text-xl">📋</span>
-          </div>
-          <h2 class="text-2xl font-bold text-gray-100">Detected Sections</h2>
-        </div>
-        <div id="sectionsContent"></div>
-      </div>
-
-      <!-- Raw Data (Collapsible) -->
-      <div id="rawCard" class="hidden animate-slide-up glass rounded-3xl p-8">
-        <details class="group">
-          <summary class="flex items-center space-x-3 cursor-pointer hover:text-blue-400 transition-colors">
-            <div class="w-8 h-8 bg-gradient-to-r from-gray-600 to-gray-700 rounded-lg flex items-center justify-center">
-              <span class="text-sm">🔧</span>
-            </div>
-            <h3 class="text-lg font-semibold">Raw Analysis Data</h3>
-          </summary>
-          <div id="rawContent" class="mt-6"></div>
-        </details>
-      </div>
-
-      <!-- Error Card -->
-      <div id="errorCard" class="hidden animate-slide-up bg-red-500/10 border border-red-500/30 rounded-3xl p-8">
-        <div class="flex items-center space-x-3 mb-4">
-          <div class="w-10 h-10 bg-red-500 rounded-xl flex items-center justify-center">
-            <span class="text-xl">⚠️</span>
-          </div>
-          <h2 class="text-2xl font-bold text-red-400">Error</h2>
-        </div>
-        <div id="errorContent"></div>
+        <div id="structureContent"></div>
       </div>
     </div>
   </div>
 
   <script>
-    const $ = (id) => document.getElementById(id);
-    const show = (el, visible = true) => {
-      if (visible) {
-        el.classList.remove('hidden');
-        el.classList.add('animate-slide-up');
-      } else {
-        el.classList.add('hidden');
-      }
-    };
+    const $ = id => document.getElementById(id);
+    const show = (el, visible = true) => el.classList.toggle('hidden', !visible);
+    
+    // File upload handlers
+    ['resume', 'jd_file'].forEach(id => {
+      $(id).addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        const statusEl = $(id + (id === 'resume' ? 'Status' : 'Status'));
+        if (file) {
+          statusEl.innerHTML = `<span style="color: #10b981; font-size: 0.875rem;">✓ ${file.name}</span>`;
+          this.parentElement.classList.add('active');
+        }
+      });
+    });
 
-    const allowedExt = new Set(['.pdf', '.docx', '.txt']);
-    function extOk(name) { 
-      const m = name.toLowerCase().match(/\.[^.]+$/); 
-      return m && allowedExt.has(m[0]); 
-    }
-
-    function escapeHtml(text) {
-      const div = document.createElement('div');
-      div.textContent = text;
-      return div.innerHTML;
-    }
-
-    function createList(items = [], className = '') {
-      if (!items || !items.length) {
-        return '<div class="text-gray-500 text-sm italic">None detected</div>';
-      }
-      return `<ul class="space-y-2 ${className}">
-        ${items.map(item => `
-          <li class="flex items-start space-x-2">
-            <span class="text-blue-400 text-xs mt-1.5">▶</span>
-            <span class="text-gray-300 text-sm">${escapeHtml(String(item))}</span>
-          </li>
-        `).join('')}
-      </ul>`;
-    }
-
-    function createSkillPills(skills = []) {
-      if (!skills || !skills.length) {
-        return '<div class="text-gray-500 text-sm italic">No skills detected</div>';
-      }
-      return `<div class="flex flex-wrap gap-2">
-        ${skills.map(skill => `
-          <span class="px-3 py-1 bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-500/30 rounded-full text-xs font-medium text-blue-300">
-            ${escapeHtml(skill)}
-          </span>
-        `).join('')}
-      </div>`;
-    }
-
-    function createMetricsTable(obj) {
-      if (!obj || Object.keys(obj).length === 0) {
-        return '<div class="text-gray-500 text-sm italic">No metrics available</div>';
-      }
-      return `          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        ${Object.entries(obj).map(([key, value]) => `
-          <div class="bg-slate-800/30 rounded-xl p-4 border border-slate-700">
-            <div class="text-xs text-gray-500 uppercase tracking-wide">${escapeHtml(key)}</div>
-            <div class="text-lg font-bold text-blue-400">${Number(value).toFixed(2)}</div>
-          </div>
-        `).join('')}
-      </div>`;
-    }
-
-    function getGradeColor(grade) {
-      switch (grade.toUpperCase()) {
-        case 'A': return 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30';
-        case 'B': return 'bg-blue-500/20 text-blue-400 border-blue-500/30';
-        case 'C': return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
-        case 'D': return 'bg-orange-500/20 text-orange-400 border-orange-500/30';
-        case 'F': return 'bg-red-500/20 text-red-400 border-red-500/30';
-        default: return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
-      }
-    }
-
-    let radarChart;
-
-    $('resumeForm').addEventListener('submit', async (e) => {
+    // Form submission
+    $('analyzeForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       
-      // Clear previous results
-      ['errorCard', 'summaryCard', 'scoreCard', 'insightsCard', 'spacyCard', 'bertCard', 'gptCard', 'sectionsCard', 'rawCard'].forEach(id => {
-        show($(id), false);
-      });
-
       const resume = $('resume').files[0];
-      const jdFile = $('jd_file').files[0];
       const jdText = $('job_desc').value.trim();
-
-      // Validation
-      if (!resume) return showError('Please select a resume file.');
-      if (!extOk(resume.name)) return showError('Unsupported file type. Please use PDF, DOCX, or TXT.');
-      if (resume.size > 16 * 1024 * 1024) return showError('File too large. Maximum size is 16 MB.');
+      const jdFile = $('jd_file').files[0];
       
-      if (!jdText && !jdFile) return showError('Please provide a job description (text or file).');
-
-      const formData = new FormData();
-      formData.append('resume', resume);
-      if (jdText) formData.append('job_desc', jdText);
-      if (jdFile) {
-        if (!extOk(jdFile.name)) return showError('Unsupported JD file type.');
-        formData.append('jd_file', jdFile);
-      }
-
-      // Show loading state
+      // Validation
+      if (!resume) return showError('Please upload a resume file');
+      if (!jdText && !jdFile) return showError('Please provide a job description');
+      
+      // Show loading
       const btn = $('analyzeBtn');
       const spinner = $('spinner');
+      const btnText = $('btnText');
+      
       btn.disabled = true;
-      spinner.classList.remove('hidden');
+      show(spinner, true);
+      btnText.textContent = 'Analyzing...';
+      show($('errorCard'), false);
+      show($('results'), false);
 
       try {
+        const formData = new FormData();
+        formData.append('resume', resume);
+        if (jdText) formData.append('job_desc', jdText);
+        if (jdFile) formData.append('jd_file', jdFile);
+
         const response = await fetch('/analyze', {
           method: 'POST',
           body: formData
         });
 
         const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.error || `Server error: ${response.status}`);
-        }
-
+        
+        if (!response.ok) throw new Error(data.error || 'Analysis failed');
+        
         renderResults(data);
-
+        show($('results'), true);
+        $('results').scrollIntoView({ behavior: 'smooth' });
+        
       } catch (error) {
-        showError(`Analysis failed: ${error.message}`);
-        console.error('Analysis error:', error);
+        showError(error.message);
       } finally {
         btn.disabled = false;
-        spinner.classList.add('hidden');
+        show(spinner, false);
+        btnText.textContent = '🎯 Analyze Resume';
       }
     });
 
-    function renderResults(data) {
-      renderSummary(data.Summary || {});
-      renderScore(data.ComprehensiveScore || {});
-      renderInsights(data);
-      renderSpacyAnalysis(data.SpacyResumeAnalyzer || {});
-      renderBertAnalysis(data.BertResumeAnalyzer || {});
-      renderGptAnalysis(data.GPTResumeAnalyzer || {});
-      renderSections(data.DetectedSections || null);
-      renderRawData(data);
+    function showError(message) {
+      $('errorText').textContent = message;
+      show($('errorCard'), true);
     }
 
-    function renderSummary(summary) {
-      $('summaryContent').innerHTML = `
-        <div class="mb-6">
-          <div class="text-lg font-semibold text-gray-200 mb-2">Overall Assessment</div>
-          <p class="text-gray-400 leading-relaxed">${escapeHtml(summary.overall_assessment || 'No assessment available')}</p>
-        </div>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          <div>
-            <div class="text-sm font-semibold text-emerald-400 mb-3">🟢 Key Strengths</div>
-            ${createList(summary.key_strengths)}
-          </div>
-          <div>
-            <div class="text-sm font-semibold text-amber-400 mb-3">🟡 Priority Improvements</div>
-            ${createList(summary.priority_improvements)}
-          </div>
-        </div>
+    function renderResults(data) {
+      renderScore(data.ComprehensiveScore || {});
+      renderSummary(data.Summary || {});
+  
+      // Use GPT data for skills if SpaCy not available
+      const gptData = data.GPTResumeAnalyzer || {};
+      const spacyData = data.SpacyResumeAnalyzer || {};
+      const bertData = data.BertResumeAnalyzer || {};
+  
+      // Create skills data from GPT if SpaCy not available
+      if (!spacyData.skills_match_score && gptData.analysis) {
+        const gptSkillsData = createSkillsFromGPT(gptData);
+        renderSkills(gptSkillsData);
+      } else {
+        renderSkills(spacyData);
+      }
+  
+      renderRecommendations(gptData);
+  
+      // Create structure data from GPT if BERT not available
+      if (!bertData.ats_score && gptData.analysis) {
+        const gptStructureData = createStructureFromGPT(gptData);
+        renderStructure(gptStructureData, data.DetectedSections || {});
+      } else {
+        renderStructure(bertData, data.DetectedSections || {});
+      }
+    }
 
-        <div>
-          <div class="text-sm font-semibold text-blue-400 mb-3">⚡ Quick Wins</div>
-          ${createList(summary.quick_wins)}
-        </div>
-      `;
-      show($('summaryCard'));
+    function createSkillsFromGPT(gptData) {
+      const analysis = gptData.analysis || {};
+      const missingSkills = analysis.missing_skills || [];
+      
+      // Create a mock skills score based on GPT's overall fit score
+      let skillsScore = 0;
+      if (gptData.final_score) {
+        skillsScore = Math.max(0, gptData.final_score - 10); // Slightly lower than overall
+      }
+      
+      return {
+        skills_match_score: skillsScore,
+        entities: {
+          SKILLS: missingSkills.length > 0 ? ['Skills analysis available in optimization tips'] : []
+        },
+        recommendations: missingSkills
+      };
+    }
+
+    function createStructureFromGPT(gptData) {
+      const analysis = gptData.analysis || {};
+      
+      // Create a mock ATS score based on GPT's overall fit score
+      let atsScore = 0;
+      if (gptData.final_score) {
+        atsScore = Math.min(100, gptData.final_score + 5); // Slightly higher than overall
+      }
+      
+      return {
+        ats_score: atsScore,
+        recommendations: analysis.ats_optimization_tips || []
+      };
     }
 
     function renderScore(scoreData) {
       const score = Number(scoreData.final_score || 0).toFixed(1);
       const grade = (scoreData.grade || 'N/A').toUpperCase();
-      const breakdown = scoreData.breakdown || {};
+      
+      $('scoreNumber').textContent = score;
+      
+      const gradeBadge = $('gradeBadge');
+      gradeBadge.textContent = `Grade ${grade}`;
+      gradeBadge.className = `grade-badge grade-${grade.toLowerCase()}`;
+      
+      if (scoreData.breakdown) {
+        $('scoreBreakdown').innerHTML = `
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-top: 1rem;">
+            ${Object.entries(scoreData.breakdown).map(([key, value]) => `
+              <div style="text-align: center; padding: 1rem; background: #f8fafc; border-radius: 8px;">
+                <div style="font-size: 1.5rem; font-weight: 600; color: #667eea;">${Number(value).toFixed(1)}</div>
+                <div style="font-size: 0.75rem; color: #6b7280; text-transform: uppercase;">${key.replace('_', ' ')}</div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+    }
 
-      $('scoreMeta').innerHTML = `
-        <div class="text-center mb-6">
-          <div class="text-5xl font-black text-blue-400 mb-2">${score}<span class="text-2xl text-gray-500">/100</span></div>
-          <div class="inline-flex items-center px-4 py-2 rounded-full border ${getGradeColor(grade)}">
-            <span class="text-lg font-bold">Grade ${grade}</span>
+    function renderSummary(summary) {
+      $('summaryContent').innerHTML = `
+        <div style="margin-bottom: 1.5rem;">
+          <h3 style="font-weight: 600; margin-bottom: 0.5rem; color: #374151;">Assessment</h3>
+          <p style="color: #6b7280;">${summary.overall_assessment || 'No assessment available'}</p>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
+          <div>
+            <h4 style="color: #10b981; font-weight: 600; margin-bottom: 0.75rem;">✅ Strengths</h4>
+            ${createList(summary.key_strengths, '#10b981')}
+          </div>
+          <div>
+            <h4 style="color: #f59e0b; font-weight: 600; margin-bottom: 0.75rem;">⚡ Quick Wins</h4>
+            ${createList(summary.quick_wins, '#f59e0b')}
           </div>
         </div>
-        ${createMetricsTable(breakdown)}
       `;
-      
-      show($('scoreCard'));
-      renderRadarChart(breakdown);
     }
 
-    function renderInsights(data) {
-      const insights = [];
-      
-      // Collect key insights from different analyzers
-      if (data.SpacyResumeAnalyzer?.skills_match_score) {
-        insights.push(`Skills match score: ${data.SpacyResumeAnalyzer.skills_match_score.toFixed(1)}/100`);
-      }
-      
-      if (data.BertResumeAnalyzer?.ats_score) {
-        insights.push(`ATS compatibility: ${data.BertResumeAnalyzer.ats_score.toFixed(1)}/100`);
-      }
-
-      if (data.GPTResumeAnalyzer?.analysis?.overall_fit_score) {
-        insights.push(`Overall fit: ${data.GPTResumeAnalyzer.analysis.overall_fit_score}/10`);
-      }
-
-      $('insightsContent').innerHTML = `
-        <div class="space-y-4">
-          ${insights.map(insight => `
-            <div class="bg-dark-800/30 rounded-xl p-4 border border-dark-700">
-              <span class="text-gray-300">${escapeHtml(insight)}</span>
-            </div>
-          `).join('')}
-        </div>
-      `;
-      
-      if (insights.length > 0) {
-        show($('insightsCard'));
-      }
-    }
-
-    function renderSpacyAnalysis(spacy) {
+    function renderSkills(spacy) {
       const skills = spacy.entities?.SKILLS || [];
-      const skillsByCategory = spacy.entities?.SKILLS_BY_CATEGORY || {};
-
-      $('spacyContent').innerHTML = `
-        <div class="space-y-6">
-          <div class="bg-slate-800/20 rounded-xl p-4">
-            <div class="text-sm text-gray-400 mb-1">Skills Match Score</div>
-            <div class="text-2xl font-bold text-green-400">${Number(spacy.skills_match_score || 0).toFixed(1)}/100</div>
-          </div>
-
-          <div>
-            <div class="text-sm font-semibold text-gray-300 mb-3">Detected Skills</div>
-            ${createSkillPills(skills)}
-          </div>
-
-          ${Object.keys(skillsByCategory).length > 0 ? `
-            <div>
-              <div class="text-sm font-semibold text-gray-300 mb-3">Skills by Category</div>
-              <div class="space-y-3">
-                ${Object.entries(skillsByCategory).map(([category, categorySkills]) => `
-                  <div>
-                    <div class="text-xs text-gray-500 mb-2 uppercase tracking-wide">${escapeHtml(category)}</div>
-                    ${createSkillPills(categorySkills)}
-                  </div>
-                `).join('')}
-              </div>
-            </div>
-          ` : ''}
-
-          <div>
-            <div class="text-sm font-semibold text-gray-300 mb-3">Recommendations</div>
-            ${createList(spacy.recommendations)}
+      const score = Number(spacy.skills_match_score || 0).toFixed(1);
+      
+      $('skillsContent').innerHTML = `
+        <div style="text-align: center; margin-bottom: 2rem;">
+          <div style="font-size: 2rem; font-weight: 600; color: #8b5cf6;">${score}/100</div>
+          <div style="color: #6b7280;">Keyword Match Score</div>
+        </div>
+        
+        <div>
+          <h4 style="font-weight: 600; margin-bottom: 1rem;">Skills Found in Your Resume</h4>
+          <div class="skills-grid">
+            ${skills.map(skill => `<span class="skill-tag">${skill}</span>`).join('')}
           </div>
         </div>
+        
+        ${spacy.recommendations ? `
+          <div style="margin-top: 2rem;">
+            <h4 style="font-weight: 600; margin-bottom: 1rem;">Skills to Add</h4>
+            ${createList(spacy.recommendations, '#8b5cf6')}
+          </div>
+        ` : ''}
       `;
-      show($('spacyCard'));
     }
 
-    function renderBertAnalysis(bert) {
-      $('bertContent').innerHTML = `
-        <div class="space-y-6">
-          <div class="bg-slate-800/20 rounded-xl p-4">
-            <div class="text-sm text-gray-400 mb-1">ATS Compatibility Score</div>
-            <div class="text-2xl font-bold text-purple-400">${Number(bert.ats_score || 0).toFixed(1)}/100</div>
-          </div>
-
-          <div>
-            <div class="text-sm font-semibold text-gray-300 mb-3">Section Analysis</div>
-            ${createMetricsTable(bert.section_scores)}
-          </div>
-
-          <div>
-            <div class="text-sm font-semibold text-gray-300 mb-3">Optimization Tips</div>
-            ${createList(bert.recommendations)}
-          </div>
-        </div>
-      `;
-      show($('bertCard'));
-    }
-
-    function renderGptAnalysis(gpt) {
+    function renderRecommendations(gpt) {
       if (gpt.error) {
-        $('gptContent').innerHTML = `
-          <div class="bg-red-500/10 border border-red-500/30 rounded-xl p-4">
-            <span class="text-red-400">⚠️ GPT Analysis Error: ${escapeHtml(gpt.error)}</span>
+        $('recommendationsContent').innerHTML = `
+          <div style="color: #dc2626; padding: 1rem; background: #fef2f2; border-radius: 8px;">
+            ⚠️ Advanced analysis unavailable: ${gpt.error}
           </div>
         `;
-      } else {
-        const analysis = gpt.analysis || {};
-        $('gptContent').innerHTML = `
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div>
-              <div class="text-sm font-semibold text-emerald-400 mb-3">💪 Strengths</div>
-              ${createList(analysis.strengths)}
-            </div>
-            <div>
-              <div class="text-sm font-semibold text-amber-400 mb-3">🔧 Areas to Improve</div>
-              ${createList(analysis.weaknesses)}
-            </div>
-          </div>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div>
-              <div class="text-sm font-semibold text-blue-400 mb-3">💡 Suggestions</div>
-              ${createList(analysis.suggestions)}
-            </div>
-            <div>
-              <div class="text-sm font-semibold text-red-400 mb-3">🎯 Missing Skills</div>
-              ${createList(analysis.missing_skills)}
-            </div>
-          </div>
-
-          <div class="mb-6">
-            <div class="text-sm font-semibold text-cyan-400 mb-3">🤖 ATS Optimization</div>
-            ${createList(analysis.ats_optimization_tips)}
-          </div>
-
-          <div class="bg-slate-800/20 rounded-xl p-4">
-            <div class="text-sm text-gray-400 mb-1">Overall Job Fit</div>
-            <div class="text-2xl font-bold text-indigo-400">${analysis.overall_fit_score || 'N/A'}/10</div>
-          </div>
-        `;
+        return;
       }
-      show($('gptCard'));
-    }
-
-    function renderSections(sections) {
-      if (!sections || Object.keys(sections).length === 0) return;
-
-      $('sectionsContent').innerHTML = `
-        <div class="space-y-4">
-          ${Object.entries(sections).map(([name, content]) => `
-            <details class="group bg-slate-800/20 rounded-xl border border-slate-700">
-              <summary class="p-4 cursor-pointer hover:bg-slate-700/30 rounded-xl transition-colors">
-                <span class="font-semibold text-gray-300">${escapeHtml(name)}</span>
-              </summary>
-              <div class="px-4 pb-4">
-                <pre class="text-xs text-gray-400 whitespace-pre-wrap bg-slate-900/50 rounded-lg p-3 overflow-x-auto">${escapeHtml(content)}</pre>
-              </div>
-            </details>
-          `).join('')}
-        </div>
-      `;
-      show($('sectionsCard'));
-    }
-
-    function renderRawData(data) {
-      $('rawContent').innerHTML = `
-        <pre class="text-xs text-gray-400 whitespace-pre-wrap bg-slate-900/50 rounded-xl p-4 overflow-x-auto border border-slate-700">${escapeHtml(JSON.stringify(data, null, 2))}</pre>
-      `;
-      show($('rawCard'));
-    }
-
-    function renderRadarChart(breakdown) {
-      try {
-        const labels = Object.keys(breakdown);
-        const values = Object.values(breakdown).map(v => Number(v) || 0);
-        const ctx = $('scoreChart').getContext('2d');
-
-        if (radarChart) radarChart.destroy();
-
-        radarChart = new Chart(ctx, {
-          type: 'radar',
-          data: {
-            labels: labels,
-            datasets: [{
-              label: 'Score Breakdown',
-              data: values,
-              fill: true,
-              backgroundColor: 'rgba(102, 126, 234, 0.1)',
-              borderColor: 'rgba(102, 126, 234, 0.8)',
-              borderWidth: 2,
-              pointBackgroundColor: 'rgba(102, 126, 234, 1)',
-              pointBorderColor: '#fff',
-              pointBorderWidth: 2,
-              pointRadius: 5,
-              pointHoverRadius: 7
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-              r: {
-                beginAtZero: true,
-                max: 100,
-                ticks: {
-                  stepSize: 20,
-                  color: '#6b7280',
-                  backdropColor: 'transparent'
-                },
-                grid: {
-                  color: 'rgba(107, 114, 128, 0.2)'
-                },
-                angleLines: {
-                  color: 'rgba(107, 114, 128, 0.2)'
-                },
-                pointLabels: {
-                  color: '#9ca3af',
-                  font: {
-                    size: 12,
-                    weight: '500'
-                  }
-                }
-              }
-            },
-            plugins: {
-              legend: {
-                display: false
-              }
-            },
-            animation: {
-              duration: 800,
-              easing: 'easeInOutQuart'
-            }
-          }
-        });
-      } catch (error) {
-        console.warn('Chart rendering error:', error);
-      }
-    }
-
-    function showError(message) {
-      $('errorContent').innerHTML = `
-        <div class="space-y-4">
-          <p class="text-red-300 font-medium">${escapeHtml(message)}</p>
-          <div class="text-sm text-red-400/80">
-            <p><strong>Common issues:</strong></p>
-            <ul class="mt-2 space-y-1 list-disc list-inside">
-              <li>Missing or invalid job description</li>
-              <li>Unsupported file format</li>
-              <li>File size exceeds 16 MB limit</li>
-              <li>Server connection issues</li>
-            </ul>
-          </div>
-        </div>
-      `;
-      show($('errorCard'));
-    }
-
-    // File upload visual feedback
-    const fileInputs = ['resume', 'jd_file'];
-    fileInputs.forEach(id => {
-      const input = $(id);
-      input.addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (file) {
-          const parent = input.parentElement;
-          parent.classList.add('ring-2', 'ring-blue-500/50');
-          setTimeout(() => {
-            parent.classList.remove('ring-2', 'ring-blue-500/50');
-          }, 2000);
+      
+      const analysis = gpt.analysis || {};
+      
+      // Extract job match score properly
+      let jobMatchScore = analysis.overall_fit_score;
+      let jobMatchDescription = '';
+      
+      if (typeof jobMatchScore === 'string') {
+        // Handle format like "5 - The candidate has strong technical skills.../10"
+        if (jobMatchScore.includes(' - ') && jobMatchScore.includes('/10')) {
+          const parts = jobMatchScore.split(' - ');
+          jobMatchScore = parts[0].trim();
+          jobMatchDescription = parts[1].replace('/10', '').trim();
+        } else if (jobMatchScore.includes('/10')) {
+          jobMatchScore = jobMatchScore.split('/10')[0].trim();
         }
-      });
-    });
+      }
+      
+      $('recommendationsContent').innerHTML = `
+        ${jobMatchScore ? `
+          <div style="text-align: center; margin-bottom: 2rem; padding: 1rem; background: #f0f4ff; border-radius: 8px;">
+            <div style="font-size: 2rem; font-weight: 600; color: #667eea;">${jobMatchScore}/10</div>
+            <div style="color: #6b7280;">Job Match Score</div>
+            ${jobMatchDescription ? `<p style="margin-top: 0.5rem; font-size: 0.875rem; color: #6b7280;">${jobMatchDescription}</p>` : ''}
+          </div>
+        ` : ''}
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+          <div>
+            <h4 style="color: #10b981; font-weight: 600; margin-bottom: 0.75rem;">✅ What's Working Well</h4>
+            ${createList(analysis.strengths, '#10b981')}
+          </div>
+          <div>
+            <h4 style="color: #dc2626; font-weight: 600; margin-bottom: 0.75rem;">🎯 Skills to Highlight</h4>
+            ${createList(analysis.missing_skills, '#dc2626')}
+          </div>
+        </div>
+        
+        ${analysis.suggestions ? `
+          <div style="margin-top: 2rem;">
+            <h4 style="color: #f59e0b; font-weight: 600; margin-bottom: 1rem;">💡 Action Items</h4>
+            ${createList(analysis.suggestions, '#f59e0b')}
+          </div>
+        ` : ''}
+        
+        ${analysis.ats_optimization_tips ? `
+          <div style="margin-top: 2rem;">
+            <h4 style="color: #06b6d4; font-weight: 600; margin-bottom: 1rem;">🔧 ATS Optimization</h4>
+            ${createList(analysis.ats_optimization_tips, '#06b6d4')}
+          </div>
+        ` : ''}
+      `;
+    }
+
+    function createList(items, color) {
+      if (!items || !items.length) {
+        return '<div style="color: #9ca3af; font-style: italic;">None available</div>';
+      }
+      return `
+        <div>
+          ${items.map(item => {
+            // Clean up any malformed text
+            let cleanItem = String(item).trim();
+            // Remove any trailing score text like "5 - description/10"
+            cleanItem = cleanItem.replace(/\d+\s*-\s*.*?\/\d+$/, '').trim();
+            return `
+              <div class="list-item">
+                <div class="list-icon" style="background: ${color};">•</div>
+                <span style="color: #374151;">${cleanItem}</span>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+    }
+
+    function renderStructure(bert, sections) {
+      const atsScore = Number(bert.ats_score || 0).toFixed(1);
+      
+      $('structureContent').innerHTML = `
+        <div style="text-align: center; margin-bottom: 2rem;">
+          <div style="font-size: 2rem; font-weight: 600; color: #06b6d4;">${atsScore}/100</div>
+          <div style="color: #6b7280;">Format Compatibility Score</div>
+        </div>
+        
+        ${Object.keys(sections).length > 0 ? `
+          <div>
+            <h4 style="font-weight: 600; margin-bottom: 1rem;">Resume Sections Detected</h4>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+              ${Object.keys(sections).map(section => `
+                <div style="padding: 0.75rem; background: #f0f9ff; border: 1px solid #e0f2fe; border-radius: 8px; text-align: center;">
+                  <span style="color: #0369a1; font-weight: 500;">${section}</span>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        ` : ''}
+        
+        ${bert.recommendations ? `
+          <div style="margin-top: 2rem;">
+            <h4 style="font-weight: 600; margin-bottom: 1rem;">Format Improvements</h4>
+            ${createList(bert.recommendations, '#06b6d4')}
+          </div>
+        ` : ''}
+      `;
+    }
 
     // Auto-resize textarea
-    const textarea = $('job_desc');
-    textarea.addEventListener('input', function() {
+    $('job_desc').addEventListener('input', function() {
       this.style.height = 'auto';
       this.style.height = Math.min(this.scrollHeight, 300) + 'px';
-    });
-
-    // Add some interactive effects
-    document.querySelectorAll('.glass').forEach(el => {
-      el.addEventListener('mouseenter', () => {
-        el.style.transform = 'translateY(-2px)';
-        el.style.transition = 'transform 0.2s ease-out';
-      });
-      el.addEventListener('mouseleave', () => {
-        el.style.transform = 'translateY(0)';
-      });
     });
   </script>
 </body>

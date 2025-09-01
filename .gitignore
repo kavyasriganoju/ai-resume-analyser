@@ -25,6 +25,7 @@ ENV/
 env/
 Pipfile.lock
 poetry.lock
+templates/index1.html
 
 # Jupyter / notebooks
 .ipynb_checkpoints/

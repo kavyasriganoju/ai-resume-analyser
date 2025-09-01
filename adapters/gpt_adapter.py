@@ -58,11 +58,11 @@ class GPTResumeAnalyzer(ResumeAnalyzer):
             response = self.client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[
-                    {"role": "system", "content": "You are an expert ATS resume analyzer. Always respond with valid JSON."},
+                    {"role": "system", "content": "You are an expert ATS resume analyzer and career coach. Always respond with valid JSON in the exact format requested. Be specific, actionable, and user-friendly in your analysis."},
                     {"role": "user", "content": prompt}
                 ],
-                temperature=0.3,
-                max_tokens=1000,
+                temperature=0.2,
+                max_tokens=1500,
                 response_format={"type": "json_object"}
             )
 
@@ -72,9 +72,12 @@ class GPTResumeAnalyzer(ResumeAnalyzer):
             fit_score_raw = result.get("overall_fit_score", "")
             numeric_score = self._extract_numeric_score(fit_score_raw)
 
+            # Validate and clean the response
+            cleaned_result = self._validate_and_clean_response(result)
+            
             return {
                 "type": "gpt",
-                "analysis": result,
+                "analysis": cleaned_result,
                 "token_usage": response.usage.total_tokens if response.usage else 0,
                 "final_score": numeric_score,
                 "grade": _score_to_grade(numeric_score) if numeric_score is not None else None
@@ -93,17 +96,59 @@ class GPTResumeAnalyzer(ResumeAnalyzer):
     def _extract_numeric_score(self, raw) -> float:
         """Extract number from GPT's overall_fit_score field."""
         if isinstance(raw, (int, float)):
+            # Convert 1-10 scale to 0-100 scale for consistency
             return float(raw) * 10 if raw <= 10 else float(raw)
         if isinstance(raw, str):
-            match = re.search(r'(\d+(\.\d+)?)', raw)
+            # Extract first number found, handle decimals
+            match = re.search(r'(\d+(?:\.\d+)?)', raw)
             if match:
                 val = float(match.group(1))
+                # Convert 1-10 scale to 0-100 scale
                 return val * 10 if val <= 10 else val
         return None
 
+    def _validate_and_clean_response(self, result: dict) -> dict:
+        """Validate and clean GPT response to ensure consistent format."""
+        cleaned = {
+            "overall_fit_score": result.get("overall_fit_score", 0),
+            "strengths": self._clean_list_items(result.get("strengths", [])),
+            "missing_skills": self._clean_list_items(result.get("missing_skills", [])),
+            "suggestions": self._clean_list_items(result.get("suggestions", [])),
+            "ats_optimization_tips": self._clean_list_items(result.get("ats_optimization_tips", []))
+        }
+        
+        # Ensure score is numeric
+        if isinstance(cleaned["overall_fit_score"], str):
+            match = re.search(r'(\d+(?:\.\d+)?)', cleaned["overall_fit_score"])
+            if match:
+                cleaned["overall_fit_score"] = float(match.group(1))
+            else:
+                cleaned["overall_fit_score"] = 0
+        
+        return cleaned
+    
+    def _clean_list_items(self, items: list) -> list:
+        """Clean individual list items to remove formatting artifacts."""
+        if not items:
+            return []
+        
+        cleaned_items = []
+        for item in items:
+            if isinstance(item, str):
+                # Remove any score patterns like "8/10" or "5 - text"
+                clean_item = re.sub(r'^\d+\s*[-/]\s*', '', item.strip())
+                clean_item = re.sub(r'\s*\d+/\d+\s*$', '', clean_item)
+                clean_item = clean_item.strip()
+                if clean_item:
+                    cleaned_items.append(clean_item)
+            else:
+                cleaned_items.append(str(item))
+        
+        return cleaned_items
+
     def _create_structured_prompt(self, resume_text: str, jd_text: str) -> str:
         return f"""
-Analyze this resume against the job description and provide feedback in JSON format.
+You are an expert ATS resume analyzer and career coach. Analyze this resume against the job description and provide actionable feedback.
 
 RESUME:
 {resume_text}
@@ -111,15 +156,41 @@ RESUME:
 JOB DESCRIPTION:
 {jd_text}
 
-Please analyze and respond with JSON containing:
+Provide your analysis in the following JSON format. Be specific, actionable, and user-friendly:
+
 {{
-    "strengths": ["list of 3-4 key strengths"],
-    "weaknesses": ["list of 3-4 areas for improvement"],
-    "suggestions": ["list of 3-4 specific improvement suggestions"],
-    "missing_skills": ["list of important skills mentioned in JD but missing from resume"],
-    "ats_optimization_tips": ["list of 2-3 ATS-specific tips"],
-    "overall_fit_score": "score from 1-10 with brief explanation"
+    "overall_fit_score": 7,
+    "strengths": [
+        "Strong technical background with relevant programming languages",
+        "Clear project descriptions with quantifiable results",
+        "Good educational foundation for the role"
+    ],
+    "missing_skills": [
+        "Cloud platforms (AWS, Azure) mentioned in job requirements",
+        "Specific framework experience (React, Angular)",
+        "DevOps tools and CI/CD pipeline experience"
+    ],
+    "suggestions": [
+        "Add a professional summary highlighting your key achievements",
+        "Quantify your project impacts with specific metrics and numbers",
+        "Include relevant certifications or online courses completed",
+        "Use action verbs to start each bullet point in experience section"
+    ],
+    "ats_optimization_tips": [
+        "Use exact keywords from the job description throughout your resume",
+        "Ensure your resume is in a simple, ATS-friendly format",
+        "Include a skills section with both hard and soft skills"
+    ]
 }}
+
+IMPORTANT GUIDELINES:
+- overall_fit_score: Provide ONLY a number from 1-10 (no explanation text)
+- strengths: Focus on what the candidate does well relative to the job
+- missing_skills: Identify specific skills/technologies from the JD that aren't in the resume
+- suggestions: Provide 3-4 concrete, actionable improvement recommendations
+- ats_optimization_tips: Give 2-3 specific tips to improve ATS compatibility
+- Keep all text clear, professional, and jargon-free
+- Focus on actionable advice rather than generic statements
 """
 
 def _score_to_grade(score: float) -> str:

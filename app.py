@@ -195,32 +195,47 @@ def generate_summary_insights(results):
     comp_score = results.get("ComprehensiveScore", {})
     final_score = comp_score.get("final_score")
     breakdown = comp_score.get("breakdown", {})
+    
+    # Get GPT data for insights
+    gpt_data = results.get("GPTResumeAnalyzer", {})
+    gpt_analysis = gpt_data.get("analysis", {})
 
-    # If no numeric score (GPT-only mode), fallback to GPT analysis text
-    if final_score is None:
-        if "GPTResumeAnalyzer" in results:
-            insights["overall_assessment"] = "GPT analysis available — see details in GPT output"
+    # Generate assessment based on score or GPT data
+    if final_score is not None:
+        if final_score >= 85:
+            insights["overall_assessment"] = "Excellent match! Your resume is well-optimized for this role."
+        elif final_score >= 75:
+            insights["overall_assessment"] = "Good match with room for improvement."
+        elif final_score >= 65:
+            insights["overall_assessment"] = "Moderate match - several areas need attention."
         else:
-            insights["overall_assessment"] = "No scoring available"
-        return insights
-
-    # Else, use scoring logic (SpaCy + BERT present)
-    if final_score >= 85:
-        insights["overall_assessment"] = "Excellent match! Your resume is well-optimized for this role."
-    elif final_score >= 75:
-        insights["overall_assessment"] = "Good match with room for improvement."
-    elif final_score >= 65:
-        insights["overall_assessment"] = "Moderate match - several areas need attention."
+            insights["overall_assessment"] = "Significant improvements needed to match this role."
     else:
-        insights["overall_assessment"] = "Significant improvements needed to match this role."
+        insights["overall_assessment"] = "Analysis completed - see detailed recommendations below"
 
-    for metric, score in breakdown.items():
-        if score > 80:
-            insights["key_strengths"].append(f"Strong {metric.replace('_', ' ')}")
-        elif score < 60:
-            insights["priority_improvements"].append(f"Improve {metric.replace('_', ' ')}")
-        else:
-            insights["quick_wins"].append(f"Enhance {metric.replace('_', ' ')}")
+    # Extract insights from GPT analysis
+    if gpt_analysis:
+        # Use GPT strengths as key strengths
+        gpt_strengths = gpt_analysis.get("strengths", [])
+        insights["key_strengths"] = gpt_strengths[:3] if gpt_strengths else []
+        
+        # Use GPT suggestions as quick wins
+        gpt_suggestions = gpt_analysis.get("suggestions", [])
+        insights["quick_wins"] = gpt_suggestions[:3] if gpt_suggestions else []
+        
+        # Use missing skills as priority improvements
+        missing_skills = gpt_analysis.get("missing_skills", [])
+        insights["priority_improvements"] = [f"Add {skill}" for skill in missing_skills[:3]]
+
+    # Fallback to score-based insights if GPT data not available
+    if not insights["key_strengths"] and breakdown:
+        for metric, score in breakdown.items():
+            if score > 80:
+                insights["key_strengths"].append(f"Strong {metric.replace('_', ' ')}")
+            elif score < 60:
+                insights["priority_improvements"].append(f"Improve {metric.replace('_', ' ')}")
+            else:
+                insights["quick_wins"].append(f"Enhance {metric.replace('_', ' ')}")
 
     return insights
 
