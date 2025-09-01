@@ -494,17 +494,20 @@
     function createSkillsFromGPT(gptData) {
       const analysis = gptData.analysis || {};
       const missingSkills = analysis.missing_skills || [];
-      
+  
       // Create a mock skills score based on GPT's overall fit score
       let skillsScore = 0;
       if (gptData.final_score) {
         skillsScore = Math.max(0, gptData.final_score - 10); // Slightly lower than overall
       }
-      
+  
+      // Extract skills from GPT strengths and suggestions
+      const extractedSkills = extractSkillsFromGPTText(analysis);
+  
       return {
         skills_match_score: skillsScore,
         entities: {
-          SKILLS: missingSkills.length > 0 ? ['Skills analysis available in optimization tips'] : []
+          SKILLS: extractedSkills
         },
         recommendations: missingSkills
       };
@@ -512,7 +515,7 @@
 
     function createStructureFromGPT(gptData) {
       const analysis = gptData.analysis || {};
-      
+  
       // Create a mock ATS score based on GPT's overall fit score
       let atsScore = 0;
       if (gptData.final_score) {
@@ -523,6 +526,46 @@
         ats_score: atsScore,
         recommendations: analysis.ats_optimization_tips || []
       };
+    }
+
+    function extractSkillsFromGPTText(analysis) {
+      const skills = [];
+      const strengthsText = (analysis.strengths || []).join(' ');
+      const suggestionsText = (analysis.suggestions || []).join(' ');
+      const combinedText = strengthsText + ' ' + suggestionsText;
+      
+      // Common technical skills to extract
+      const skillPatterns = [
+        /\b(JavaScript|TypeScript|Python|Java|C\+\+|C#|PHP|Ruby|Go|Rust|Swift|Kotlin)\b/gi,
+        /\b(React|Angular|Vue|Node\.js|Express|Django|Flask|Spring|Laravel)\b/gi,
+        /\b(AWS|Azure|GCP|Docker|Kubernetes|Jenkins|CI\/CD)\b/gi,
+        /\b(MySQL|PostgreSQL|MongoDB|Redis|Elasticsearch)\b/gi,
+        /\b(Git|GitHub|GitLab|Jira|Agile|Scrum)\b/gi,
+        /\b(HTML|CSS|SASS|Bootstrap|Tailwind)\b/gi,
+        /\b(REST|API|GraphQL|Microservices|DevOps)\b/gi
+      ];
+      
+      skillPatterns.forEach(pattern => {
+        const matches = combinedText.match(pattern);
+        if (matches) {
+          matches.forEach(match => {
+            if (!skills.includes(match)) {
+              skills.push(match);
+            }
+          });
+        }
+      });
+      
+      // If no specific skills found, extract general terms
+      if (skills.length === 0) {
+        const generalSkills = [
+          'Programming', 'Web Development', 'Software Engineering', 
+          'Database Management', 'Cloud Computing', 'API Development'
+        ];
+        return generalSkills.slice(0, 3);
+      }
+      
+      return skills.slice(0, 8); // Limit to 8 skills
     }
 
     function renderScore(scoreData) {
